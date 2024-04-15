@@ -88,16 +88,19 @@ function replaceForAllOtherOSes(): array
     return explode(PHP_EOL, run('grep -E -r -l -i ":author_name|:package_name|:package_description|:depends_on|:apps|:tags" --exclude-dir=vendor ./* ./.github/* | grep -v ' . basename(__FILE__)));
 }
 
-function stringToArray(string $string): array
+function stringToArray(string $string = ''): array
 {
-    $string = str_replace(' ', '', $string);
+    $result = str_replace(' ', '', $string);
 
-    if (!str_contains($string, ',')) {
-        return [$string];
+    if ($result === '') {
+        $result = [];
+    } elseif (!str_contains($string, ',')) {
+        $result = [$result];
+    } else {
+        $result = preg_split(',', $result);
     }
 
-    $result = str_replace(' ', '', $string);
-    return $result === '' ? [] : preg_split(',', $result);
+    return $result;
 }
 
 $renamedDirectory = confirm('Have you already renamed the directory to the package name ?', false);
