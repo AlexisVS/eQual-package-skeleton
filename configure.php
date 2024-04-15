@@ -90,6 +90,10 @@ function replaceForAllOtherOSes(): array
 
 function stringToArray(string $string): array
 {
+    if (!str_contains($string, ',')) {
+        return [$string];
+    }
+
     $result = str_replace(' ', '', $string);
     return $result === '' ? [] : preg_split(',', $result);
 }
