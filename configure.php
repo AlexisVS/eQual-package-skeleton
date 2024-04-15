@@ -131,6 +131,22 @@ $tests = confirm('Do you want to create tests ?', false);
 writeln('------');
 writeln("Author     : {$authorName} ({$authorEmail})");
 writeln("Package    : {$packageName} <{$description}>");
+writeln('------ manifest.json ------');
+writeln("depends_on : " . '[' . implode(', ', $depends_on)) . ']';
+writeln("apps       : " . '[' . implode(', ', $apps)) . ']';
+writeln("tags       : " . '[' . implode(', ', $tags)) . ']';
+writeln('Controllers: ');
+foreach ($controllers as $controller) {
+    writeln(" - {$controller}");
+}
+writeln('------ Added Folders ------');
+writeln('views      : ' . ($views ? '✅' : '❌'));
+writeln('entities   : ' . ($entities ? '✅' : '❌'));
+writeln('api_routes : ' . ($api_routes ? '✅' : '❌'));
+writeln('seeders    : ' . ($seeders ? '✅' : '❌'));
+writeln('i18n       : ' . ($i18n ? '✅' : '❌'));
+writeln('tests      : ' . ($tests ? '✅' : '❌'));
+writeln('------');
 
 writeln('This script will replace the above values in all relevant files in the project directory.');
 
