@@ -135,6 +135,7 @@ writeln('------ manifest.json ------');
 writeln("depends_on : " . '[' . implode(', ', $depends_on)) . ']';
 writeln("apps       : " . '[' . implode(', ', $apps)) . ']';
 writeln("tags       : " . '[' . implode(', ', $tags)) . ']';
+writeln('------');
 writeln('Controllers: ');
 foreach ($controllers as $controller) {
     writeln(" - {$controller}");
