@@ -24,7 +24,7 @@ if (!function_exists('str_contains')) {
 
 function ask(string $question, string $default = ''): string
 {
-    $answer = readline($question . ($default ? " ({$default})" : null) . ': ');
+    $answer = readline($question . ($default ? " ($default)" : null) . ': ');
 
     if (!$answer) {
         return $default;
@@ -92,18 +92,18 @@ function stringToArray(string $string = ''): array
 {
     $result = str_replace(' ', '', $string);
 
-    if ($result === '') {
-        $result = [];
-    } elseif (!str_contains($string, ',')) {
-        $result = [$result];
-    } else {
-        $result = preg_split(',', $result);
+    if (strlen($result) === 0) {
+        return [];
     }
 
-    return $result;
+    if (!str_contains($string, ',')) {
+        return [$result];
+    }
+
+    return explode(',', $result);
 }
 
-$renamedDirectory = confirm('Have you already renamed the directory to the package name ?', false);
+$renamedDirectory = confirm('Have you already renamed the directory to the package name ?');
 
 if (!$renamedDirectory) {
     writeln('Please rename the directory to the package name before running this script.');
@@ -120,7 +120,7 @@ $authorEmail = ask('Author email', $gitEmail);
 $currentDirectory = getcwd();
 $folderName = basename($currentDirectory);
 $packageName = ask('Package name', $folderName);
-$description = ask('Package description', "This is my package {$packageName}");
+$description = ask('Package description', "This is my package $packageName");
 
 $depends_on = stringToArray(ask("From which app you depends on ? (use comma separated like: \"core, finance, sale, inventory \")", 'core'));
 
@@ -130,16 +130,16 @@ $tags = stringToArray(ask("Do you want to add some tags ? (use comma separated l
 
 $controllers = stringToArray(ask("Do you want to create some controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
 
-$views = confirm('Do you want to create views ?', false);
-$entities = confirm('Do you want to create classe (entities) ?', false);
-$api_routes = confirm('Do you want to create api routes ?', false);
-$seeders = confirm('Do you want to seed into database some datas ?', false);
-$i18n = confirm('Do you need traduction files (i18n) ?', false);
-$tests = confirm('Do you want to create tests ?', false);
+$views = confirm('Do you want to create views ?');
+$entities = confirm('Do you want to create classe (entities) ?');
+$api_routes = confirm('Do you want to create api routes ?');
+$seeders = confirm('Do you want to seed into database some datas ?');
+$i18n = confirm('Do you need traduction files (i18n) ?');
+$tests = confirm('Do you want to create tests ?');
 
 writeln('------');
-writeln("Author     : {$authorName} ({$authorEmail})");
-writeln("Package    : {$packageName} <{$description}>");
+writeln("Author     : $authorName ($authorEmail)");
+writeln("Package    : $packageName <$description>");
 writeln('------ manifest.json ------');
 writeln("depends_on : " . '[' . implode(', ', $depends_on)) . ']';
 writeln("apps       : " . '[' . implode(', ', $apps)) . ']';
@@ -147,7 +147,7 @@ writeln("tags       : " . '[' . implode(', ', $tags)) . ']';
 writeln('------');
 writeln('Controllers: ');
 foreach ($controllers as $controller) {
-    writeln(" - {$controller}");
+    writeln(" - $controller");
 }
 writeln('------ Added Folders ------');
 writeln('views      : ' . ($views ? '✅' : '❌'));
@@ -167,7 +167,7 @@ if (!confirm('Modify files?', true)) {
 if (is_array($apps) && count($apps)) {
     mkdir('apps', 0755);
     foreach ($apps as $app) {
-        mkdir("apps/{$app}", 0755);
+        mkdir("apps/$app", 0755);
     }
 }
 
@@ -180,16 +180,16 @@ if (is_array($controllers) && count($controllers)) {
             $controller = array_pop($directories);
 
             foreach ($directories as $directory) {
-                mkdir("actions/{$directory}", 0755);
+                mkdir("actions/$directory", 0755);
             }
 
             $controller_path = implode('/', $directories) . '/' . $controller . '.php';
 
-            touch("actions/{$controller_path}");
-            chmod("actions/{$controller_path}", 644);
+            touch("actions/$controller_path");
+            chmod("actions/$controller_path", 644);
         } else {
-            touch("actions/{$controller}.php");
-            chmod("actions/{$controller}.php", 644);
+            touch("actions/$controller.php");
+            chmod("actions/$controller.php", 644);
         }
     }
 }
