@@ -1,0 +1,11 @@
+{
+  "name": :package_name,
+  "description": :package_description,
+  "author": :author_name,
+  "license": "LGPL-3",
+  "version": "2.0",
+  "eq_version": "2.0",
+  "depends_on": :depends_on,
+  "apps": :apps,
+  "tags": :tags
+}
