@@ -225,9 +225,9 @@ foreach ($files as $file) {
         ":author_name" => $authorName,
         ":package_name" => $packageName,
         ":package_description" => $description,
-        ":depends_on" => $depends_on,
-        ":apps" => $apps,
-        ":tags" => $tags
+        ":depends_on" => json_encode($depends_on),
+        ":apps" => json_encode($apps),
+        ":tags" => json_encode($tags)
     ]);
 
     switch (true) {
