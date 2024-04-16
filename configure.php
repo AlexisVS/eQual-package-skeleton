@@ -88,7 +88,7 @@ function replaceForAllOtherOSes(): array
     return explode(PHP_EOL, run('grep -E -r -l -i ":author_name|:package_name|:package_description|:depends_on|:apps|:tags" --exclude-dir=vendor ./* | grep -v ' . basename(__FILE__)));
 }
 
-function stringToArray(string $string = ''): array
+function stringToArray(string $string = '')
 {
     $result = str_replace(' ', '', $string);
 
@@ -100,7 +100,7 @@ function stringToArray(string $string = ''): array
         return [$result];
     }
 
-    return explode(',', $result);
+    return json_encode(explode(',', $result));
 }
 
 $renamedDirectory = confirm('Have you already renamed the directory to the package name ?');
