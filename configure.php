@@ -88,19 +88,19 @@ function replaceForAllOtherOSes(): array
     return explode(PHP_EOL, run('grep -E -r -l -i ":author_name|:package_name|:package_description|:depends_on|:apps|:tags" --exclude-dir=vendor ./* | grep -v ' . basename(__FILE__)));
 }
 
-function stringToArray(string $string = '')
+function stringToArray(string $string = ''): array
 {
     $result = str_replace(' ', '', $string);
 
     if (strlen($result) === 0) {
-        return [];
+        $result = [];
+    } elseif (!str_contains($string, ',')) {
+        $result = [$result];
+    } else {
+        $result = explode(',', $result);
     }
 
-    if (!str_contains($string, ',')) {
-        return [$result];
-    }
-
-    return json_encode(explode(',', $result));
+    return $result;
 }
 
 $renamedDirectory = confirm('Have you already renamed the directory to the package name ?');
@@ -126,7 +126,7 @@ $depends_on = stringToArray(ask("From which app you depends on ? (use comma sepa
 
 $apps = stringToArray(ask("Do you want to create some apps ? (use comma separated like: \"core, finance, sale, inventory \")"));
 
-$tags = stringToArray(ask("Do you want to add some tags ? (use comma separated like: \"core, finance, sale, inventory \")"));
+$tags = stringToArray(ask("Do you want to add some tags ? (use comma separated like: \"equal, food, login, social \")"));
 
 $controllers = stringToArray(ask("Do you want to create some controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
 
@@ -179,18 +179,17 @@ if (is_array($controllers) && count($controllers)) {
             $directories = explode('_', $controller);
             $controller = array_pop($directories);
 
-            foreach ($directories as $directory) {
-                mkdir("actions/$directory", 0755);
-            }
+            $directoryPath = implode('/', $directories);
 
-            $controller_path = implode('/', $directories) . '/' . $controller . '.php';
+            mkdir("actions/$directoryPath", 0755, true);
 
-            touch("actions/$controller_path");
-            chmod("actions/$controller_path", 644);
+            $controller_file = $directoryPath . '/' . $controller . '.php';
+
         } else {
-            touch("actions/$controller.php");
-            chmod("actions/$controller.php", 644);
+            $controller_file = $controller . '.php';
         }
+        touch("actions/$controller_file");
+        chmod("actions/$controller_file", 644);
     }
 }
 
