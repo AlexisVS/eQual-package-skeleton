@@ -103,13 +103,6 @@ function stringToArray(string $string = ''): array
     return $result;
 }
 
-$renamedDirectory = confirm('Have you already renamed the directory to the package name ?', true);
-
-if (!$renamedDirectory) {
-    writeln('Please rename the directory to the package name before running this script.');
-    exit(1);
-}
-
 $gitName = run('git config user.name');
 $authorName = ask('Author name', $gitName);
 
@@ -124,13 +117,13 @@ $description = ask('Package description', "This is my package $packageName");
 
 $depends_on = stringToArray(ask("From which app you depends on ? (use comma separated like: \"core, finance, sale, inventory \")", 'core'));
 
-$apps = stringToArray(ask("Do you want to create some apps ? (use comma separated like: \"core, finance, sale, inventory \")"));
+$apps = stringToArray(ask("Do you want to create some apps ? (use comma separated like: \"welcome, finance, sale, inventory \")"));
 
 $tags = stringToArray(ask("Do you want to add some tags ? (use comma separated like: \"equal, food, login, social \")"));
 
 $action_controllers = stringToArray(ask("Do you want to create some actions controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
 
-$data_controllers = stringToArray(ask("Do you want to create some data controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
+$data_controllers = stringToArray(ask("Do you want to create some data controllers ? (use comma separated like: \"userinfo, appinfo, envinfo \")"));
 
 $views = confirm('Do you want to create views ?');
 $entities = confirm('Do you want to create classe (entities) ?');
@@ -146,13 +139,11 @@ writeln('------ manifest.json ------');
 writeln("depends_on : " . json_encode($depends_on));
 writeln("apps       : " . json_encode($apps));
 writeln("tags       : " . json_encode($tags));
-writeln('------');
-writeln('Action controllers: ');
+writeln('------ Action controllers: ------');
 foreach ($action_controllers as $controller) {
     writeln(" - $controller");
 }
-writeln('------');
-writeln('Data controllers: ');
+writeln('------ Data controllers: ------');
 foreach ($data_controllers as $controller) {
     writeln(" - $controller");
 }
@@ -225,7 +216,7 @@ list( \$params, \$providers ) = eQual::announce( [
     }
 }
 
-createControllers($action_controllers, $packageName, 'actions');
+createControllers($action_controllers, $packageName);
 createControllers($data_controllers, $packageName, 'data');
 
 if (is_array($apps) && count($apps)) {
