@@ -103,7 +103,7 @@ function stringToArray(string $string = ''): array
     return $result;
 }
 
-$renamedDirectory = confirm('Have you already renamed the directory to the package name ?');
+$renamedDirectory = confirm('Have you already renamed the directory to the package name ?', true);
 
 if (!$renamedDirectory) {
     writeln('Please rename the directory to the package name before running this script.');
@@ -128,7 +128,9 @@ $apps = stringToArray(ask("Do you want to create some apps ? (use comma separate
 
 $tags = stringToArray(ask("Do you want to add some tags ? (use comma separated like: \"equal, food, login, social \")"));
 
-$controllers = stringToArray(ask("Do you want to create some controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
+$action_controllers = stringToArray(ask("Do you want to create some actions controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
+
+$data_controllers = stringToArray(ask("Do you want to create some data controllers ? (use comma separated like: \"model_update, model_create, model_delete \")"));
 
 $views = confirm('Do you want to create views ?');
 $entities = confirm('Do you want to create classe (entities) ?');
@@ -145,17 +147,22 @@ writeln("depends_on : " . json_encode($depends_on));
 writeln("apps       : " . json_encode($apps));
 writeln("tags       : " . json_encode($tags));
 writeln('------');
-writeln('Controllers: ');
-foreach ($controllers as $controller) {
+writeln('Action controllers: ');
+foreach ($action_controllers as $controller) {
+    writeln(" - $controller");
+}
+writeln('------');
+writeln('Data controllers: ');
+foreach ($data_controllers as $controller) {
     writeln(" - $controller");
 }
 writeln('------ Added Folders ------');
-writeln('views      : ' . ($views ? '✅' : '❌'));
-writeln('entities   : ' . ($entities ? '✅' : '❌'));
-writeln('api_routes : ' . ($api_routes ? '✅' : '❌'));
-writeln('seeders    : ' . ($seeders ? '✅' : '❌'));
-writeln('i18n       : ' . ($i18n ? '✅' : '❌'));
-writeln('tests      : ' . ($tests ? '✅' : '❌'));
+writeln('views      : ' . ($views ? '   ✅   ' : '   ❌   '));
+writeln('entities   : ' . ($entities ? '   ✅   ' : '   ❌   '));
+writeln('api_routes : ' . ($api_routes ? '   ✅   ' : '   ❌   '));
+writeln('seeders    : ' . ($seeders ? '   ✅   ' : '   ❌   '));
+writeln('i18n       : ' . ($i18n ? '   ✅   ' : '   ❌   '));
+writeln('tests      : ' . ($tests ? '   ✅   ' : '   ❌   '));
 writeln('------');
 
 writeln('This script will replace the above values in all relevant files in the project directory.');
@@ -164,6 +171,63 @@ if (!confirm('Modify files?', true)) {
     exit(1);
 }
 
+/**
+ * @param array $controllers
+ * @param string $controller_type
+ * Can be "actions" or "data"
+ * @param string $packageName
+ * @return void
+ */
+function createControllers(array $controllers, string $packageName, string $controller_type = 'actions'): void
+{
+    if (count($controllers)) {
+        mkdir($controller_type, 0755);
+
+        foreach ($controllers as $controller) {
+            if (str_contains($controller, '_')) {
+                $directories = explode('_', $controller);
+                $controller = array_pop($directories);
+
+                $directoryPath = implode('/', $directories);
+
+                @mkdir($controller_type . "/" . $directoryPath, 0755, true);
+
+                $controller_file = $directoryPath . '/' . $controller . '.php';
+
+                $namespace = $packageName . '\\' . $controller_type . '\\' . implode('\\', $directories);
+            } else {
+                $controller_file = $controller . '.php';
+                $namespace = $packageName . '\\' . $controller_type;
+            }
+            $controller_content = sprintf("<?php
+
+namespace %s;
+
+list( \$params, \$providers ) = eQual::announce( [
+    'description' => '',
+    'params'      => [],
+    'response'    => [
+        'content-type'      => 'application/json',
+        'charset'           => 'UTF-8',
+        'accept-origin'     => '*'
+    ],
+    'constants'   => [],
+    'access'      => [
+        'visibility' => 'public',
+    ],
+    'providers'   => []
+]);
+", $namespace);
+
+            file_put_contents($controller_type . "/$controller_file", $controller_content);
+            chmod($controller_type . "/$controller_file", 0644);
+        }
+    }
+}
+
+createControllers($action_controllers, $packageName, 'actions');
+createControllers($data_controllers, $packageName, 'data');
+
 if (is_array($apps) && count($apps)) {
     mkdir('apps', 0755);
     foreach ($apps as $app) {
@@ -171,36 +235,6 @@ if (is_array($apps) && count($apps)) {
     }
 }
 
-if (is_array($controllers) && count($controllers)) {
-    mkdir('actions', 0755);
-
-    foreach ($controllers as $controller) {
-        if (str_contains($controller, '_')) {
-            $directories = explode('_', $controller);
-            $controller = array_pop($directories);
-
-            $directoryPath = implode('/', $directories);
-
-            @mkdir("actions/$directoryPath", 0755, true);
-
-            $controller_file = $directoryPath . '/' . $controller . '.php';
-
-            $namespace = $packageName . '\actions\\' . implode('\\', $directories);
-        } else {
-            $controller_file = $controller . '.php';
-            $namespace = $packageName . '\actions';
-        }
-        $controller_content = <<<PHP
-        <?php
-        
-        namespace $namespace;
-        
-        PHP;
-
-        file_put_contents("actions/$controller_file", $controller_content);
-        chmod("actions/$controller_file", 0644);
-    }
-}
 
 if ($views) {
     mkdir('views', 0755);
