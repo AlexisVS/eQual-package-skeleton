@@ -141,9 +141,9 @@ writeln('------');
 writeln("Author     : $authorName ($authorEmail)");
 writeln("Package    : $packageName <$description>");
 writeln('------ manifest.json ------');
-writeln("depends_on : " . '[' . implode(', ', $depends_on)) . ']';
-writeln("apps       : " . '[' . implode(', ', $apps)) . ']';
-writeln("tags       : " . '[' . implode(', ', $tags)) . ']';
+writeln("depends_on : " . json_encode($depends_on));
+writeln("apps       : " . json_encode($apps));
+writeln("tags       : " . json_encode($tags));
 writeln('------');
 writeln('Controllers: ');
 foreach ($controllers as $controller) {
@@ -181,15 +181,24 @@ if (is_array($controllers) && count($controllers)) {
 
             $directoryPath = implode('/', $directories);
 
-            mkdir("actions/$directoryPath", 0755, true);
+            @mkdir("actions/$directoryPath", 0755, true);
 
             $controller_file = $directoryPath . '/' . $controller . '.php';
 
+            $namespace = $packageName . '\actions\\' . implode('\\', $directories);
         } else {
             $controller_file = $controller . '.php';
+            $namespace = $packageName . '\actions';
         }
-        touch("actions/$controller_file");
-        chmod("actions/$controller_file", 644);
+        $controller_content = <<<PHP
+        <?php
+        
+        namespace $namespace;
+        
+        PHP;
+
+        file_put_contents("actions/$controller_file", $controller_content);
+        chmod("actions/$controller_file", 0644);
     }
 }
 
